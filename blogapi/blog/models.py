@@ -9,7 +9,6 @@ from django.utils import timezone
 
 # Custom user manager to handle user creation
 class CustomUserManager(BaseUserManager):
-    # Method to create a regular user
     def create_user(self, email, first_name, last_name, country, password=None):
         if not email:
             raise ValueError("Email must be set")
@@ -20,78 +19,59 @@ class CustomUserManager(BaseUserManager):
         if not country:
             raise ValueError("Country is required")
 
-        email = self.normalize_email(email)  # Normalize email address
+        email = self.normalize_email(email)
         user = self.model(
             email=email, first_name=first_name, last_name=last_name, country=country
         )
-        user.set_password(password)  # Hash the password
-        user.save(using=self._db)  # Save user to database
+        user.set_password(password)
+        user.save(using=self._db)
         return user
 
-    # Method to create a superuser (admin)
     def create_superuser(self, email, first_name, last_name, country, password):
-        user = self.create_user(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            country=country,
-            password=password,
-        )
-        user.is_staff = True  # Grant admin privileges
-        user.is_superuser = True  # Grant superuser privileges
+        user = self.create_user(email, first_name, last_name, country, password)
+        user.is_staff = True
+        user.is_superuser = True
         user.save(using=self._db)
         return user
 
 
 # Custom user model extending Django's AbstractBaseUser
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)  # Unique email field (acts as username)
-    first_name = models.CharField(max_length=30)  # First name of the user
-    last_name = models.CharField(max_length=30)  # Last name of the user
-    country = models.CharField(max_length=50)  # Country field
-    is_staff = models.BooleanField(
-        default=False
-    )  # Determines if user can access admin panel
-    is_active = models.BooleanField(default=True)  # Active status of the user
-    date_joined = models.DateTimeField(default=timezone.now)  # Date of account creation
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    country = models.CharField(max_length=50)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
 
-    objects = CustomUserManager()  # Use custom user manager
+    objects = CustomUserManager()
 
-    USERNAME_FIELD = "email"  # Use email as the username field
-    REQUIRED_FIELDS = [
-        "first_name",
-        "last_name",
-        "country",
-    ]  # Required fields when creating a user
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name", "country"]
 
     def __str__(self):
-        return self.email  # String representation of the user
+        return self.email
 
 
 # Blog model to store blog posts
 class Blog(models.Model):
-    author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE
-    )  # Link blog to user
-    title = models.CharField(max_length=200)  # Title of the blog
-    content = models.TextField()  # Blog content
-    image = models.ImageField(
-        upload_to="blog_images/", null=True, blank=True
-    )  # Optional image
-    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp of blog creation
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    image = models.ImageField(upload_to="blog_images/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title  # String representation of the blog post
+        return self.title
 
 
 # Model to store password reset tokens
 class PasswordResetToken(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # Link token to user
-    token = models.CharField(
-        max_length=100, unique=True
-    )  # Unique token for password reset
-    created_at = models.DateTimeField(auto_now_add=True)  # Timestamp of token creation
-    expires_at = models.DateTimeField()  # Expiration time for the token
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
 
     def __str__(self):
-        return f"Token for {self.user.email}"  # String representation of the token
+        return f"Token for {self.user.email}"

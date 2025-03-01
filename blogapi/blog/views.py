@@ -16,7 +16,6 @@ from .serializers import (
     PasswordResetConfirmSerializer,
 )
 
-# Get the custom user model
 CustomUser = get_user_model()
 
 
@@ -27,8 +26,7 @@ def register_user(request):
     if serializer.is_valid():
         serializer.save()
         return Response(
-            {"message": "User Registeration Successfull"},
-            serializer.data,
+            {"message": "User Registration Successful", "user": serializer.data},
             status=status.HTTP_201_CREATED,
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -39,9 +37,7 @@ def register_user(request):
 def login_user(request):
     email = request.data.get("email")
     password = request.data.get("password")
-
     user = CustomUser.objects.filter(email=email).first()
-
     if user and user.check_password(password):
         refresh = RefreshToken.for_user(user)
         return Response(
@@ -73,7 +69,6 @@ def blog_list(request):
         blogs = Blog.objects.all()
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
-
     elif request.method == "POST":
         serializer = BlogSerializer(data=request.data)
         if serializer.is_valid():
@@ -103,7 +98,8 @@ def blog_detail(request, pk):
             )
 
         if request.method == "PUT":
-            serializer = BlogSerializer(blog, data=request.data)
+            # Allow partial updates (e.g. updating the image without changing other fields)
+            serializer = BlogSerializer(blog, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)

@@ -21,7 +21,4 @@ urlpatterns = [
     path("api/blogs/<int:pk>/", blog_detail, name="blog-detail"),
     path("api/forgot-password/", forgot_password, name="forgot-password"),
     path("api/reset-password/<str:token>/", reset_password, name="reset-password"),
-]
-
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
