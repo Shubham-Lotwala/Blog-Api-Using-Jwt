@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Blog
+from .models import *
 
 
 # Serializer for User Registration

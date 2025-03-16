@@ -54,7 +54,7 @@ def login_user(request):
 # User Logout View
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def logout_user(request):
+def logout_user():
     return Response(
         {"message": "Successfully logged out."}, status=status.HTTP_205_RESET_CONTENT
     )
